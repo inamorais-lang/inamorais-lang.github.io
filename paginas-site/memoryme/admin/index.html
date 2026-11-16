@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>PetBubble · Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#F7F6F2; --ink:#141414; --muted:#6E6D72; --pink:#FF3D81; --lime:#C8F53A; --surface:#fff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.45 "DM Sans", system-ui, sans-serif; }
+  main { max-width:440px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font:700 28px/1.1 "Bricolage Grotesque", sans-serif; margin:8px 0 4px; }
+  .muted { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--surface); border-radius:18px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); display:grid; gap:12px; margin-bottom:16px; }
+  label { font-weight:600; font-size:14px; display:grid; gap:6px; }
+  input, select { font:inherit; padding:12px 14px; border-radius:12px; border:0; background:var(--paper); width:100%; }
+  input:focus, select:focus { outline:2px solid var(--pink); }
+  button { font:600 16px "DM Sans", sans-serif; border:0; border-radius:999px; padding:14px; cursor:pointer; }
+  .primary { background:var(--pink); color:#fff; }
+  .secondary { background:var(--lime); color:var(--ink); }
+  button:disabled { opacity:.5; }
+  .msg { padding:12px 14px; border-radius:12px; background:#EEF9D0; }
+  .msg.error { background:#FFE3EC; }
+  [hidden] { display:none !important; }
+  .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>PetBubble · Admin</h1>
+  <p class="muted">Dar créditos a uma conta pelo código que aparece nas Definições da app. Entras com um link enviado para o teu email.</p>
+
+  <section class="card" id="step-email">
+    <label>O teu email de administradora
+      <input id="email" type="email" autocomplete="email" inputmode="email">
+    </label>
+    <button class="primary" id="send">Enviar link de entrada</button>
+  </section>
+
+  <section class="card" id="step-code" hidden>
+    <p style="margin:0">Abre o email <strong>“Your sign-in link”</strong> neste telemóvel e toca em <strong>Sign in</strong>. Voltas a esta página já com sessão iniciada.</p>
+  </section>
+
+  <section class="card" id="step-grant" hidden>
+    <label>Código da conta
+      <input id="account" placeholder="PB-7K3Q9X" autocapitalize="characters" autocomplete="off">
+    </label>
+    <label>Créditos
+      <select id="credits">
+        <option>1</option><option selected>2</option><option>3</option><option>5</option><option>10</option><option>30</option>
+      </select>
+    </label>
+    <label>Nota (opcional)
+      <input id="note" maxlength="200" placeholder="Ex.: influencer, compensação">
+    </label>
+    <button class="primary" id="grant">Dar créditos</button>
+    <div class="row"><span class="muted" id="who"></span><button class="secondary" id="logout">Sair</button></div>
+  </section>
+
+  <section class="card" id="step-stats" hidden>
+    <div class="row">
+      <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">📊 Estatísticas</h2>
+      <select id="statsDays" style="width:auto;padding:8px;border-radius:12px;border:0;font:inherit">
+        <option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option>
+      </select>
+    </div>
+    <div id="stats" class="muted">A carregar…</div>
+  </section>
+
+  <section class="card" id="step-trends" hidden>
+    <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">🔥 Tema do momento</h2>
+    <p class="muted" style="margin:0">Aparece no topo da app, nas 4 línguas. A IA recusa pessoas reais, marcas e tragédias.</p>
+    <label>Tema
+      <input id="topic" maxlength="120" placeholder="Ex.: a tempestade que foi anunciada e não chegou">
+    </label>
+    <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px">
+      <legend style="font-weight:600;font-size:14px;margin-bottom:6px">Países onde aparece</legend>
+      <div class="row" style="flex-wrap:wrap;justify-content:flex-start">
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="market" value="PT" style="width:auto"> Portugal</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="market" value="ES" style="width:auto"> Espanha</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="market" value="FR" style="width:auto"> França</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="market" value="GB" style="width:auto"> Reino Unido</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="market" value="US" style="width:auto"> EUA</label>
+      </div>
+    </fieldset>
+    <button class="primary" id="publish">Publicar tema</button>
+    <div id="trends"></div>
+  </section>
+
+  <section class="card" id="step-push" hidden>
+    <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">📣 Notificações</h2>
+    <p class="muted" style="margin:0">Escreve em português; a IA traduz para inglês, espanhol e francês. Só chega a quem ligou as notificações, nos países escolhidos. No máximo 1 por semana.</p>
+    <label>Título
+      <input id="pushTitle" maxlength="60" placeholder="Ex.: 🎄 Chegou o modo Natal!">
+    </label>
+    <label>Mensagem
+      <input id="pushBody" maxlength="180" placeholder="Ex.: Veste o teu patudo para o postal de Natal.">
+    </label>
+    <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px">
+      <legend style="font-weight:600;font-size:14px;margin-bottom:6px">Países</legend>
+      <div class="row" style="flex-wrap:wrap;justify-content:flex-start">
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="pushMarket" value="PT" style="width:auto"> Portugal</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="pushMarket" value="ES" style="width:auto"> Espanha</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="pushMarket" value="FR" style="width:auto"> França</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="pushMarket" value="GB" style="width:auto"> Reino Unido</label>
+        <label style="display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" name="pushMarket" value="US" style="width:auto"> EUA</label>
+      </div>
+    </fieldset>
+    <button class="primary" id="sendPush">Enviar notificação</button>
+    <div id="broadcasts"></div>
+  </section>
+
+  <section class="card" id="step-phrases" hidden>
+    <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">⭐ Frases-modelo</h2>
+    <p class="muted" style="margin:0">Escreve as tuas ou marca ⭐ nas que as pessoas escreveram na app (sem nome nem conta). Todas as ⭐ são exemplos de estilo para a IA (imita, não copia).</p>
+    <label>Escrever uma frase-modelo
+      <input id="newPhrase" maxlength="45" placeholder="Ex.: O sofá é meu. Tu tens o chão.">
+    </label>
+    <div class="row" style="justify-content:flex-start;gap:8px">
+      <select id="newPhraseLang" style="width:auto;padding:10px;border-radius:12px;border:0;font:inherit">
+        <option value="pt-PT">🇵🇹 Português</option><option value="en">🇬🇧🇺🇸 Inglês</option><option value="es">🇪🇸 Espanhol</option><option value="fr">🇫🇷 Francês</option>
+      </select>
+      <button class="primary" id="addPhrase" style="width:auto">Adicionar exemplo</button>
+    </div>
+    <div id="phrases"></div>
+  </section>
+
+  <section class="card" id="step-reports" hidden>
+    <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">🚩 Imagens reportadas</h2>
+    <p class="muted" style="margin:0">Imagens que os donos reportaram como impróprias na app (mais recentes primeiro).</p>
+    <div id="reports"></div>
+  </section>
+
+  <div class="msg" id="msg" hidden></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  // Public (publishable) key: safe in a page. Only accounts listed as admin on the server can give credits.
+  const sb = supabase.createClient('https://zuwfxzgbxhdpnmkyjdad.supabase.co', 'sb_publishable_yoH55zM1CCVPzjsS9z36lA_qcD7R6M8');
+  const $ = (id) => document.getElementById(id);
+  const ERRORS = {
+    not_admin: 'Esta conta não é de administradora.',
+    unknown_account: 'Não existe nenhuma conta com esse código.',
+    invalid_amount: 'Escolhe entre 1 e 100 créditos.',
+  };
+  function say(text, error = false) { const m = $('msg'); m.textContent = text; m.hidden = false; m.classList.toggle('error', error); }
+  function show(step) {
+    for (const s of ['step-email', 'step-code', 'step-grant']) $(s).hidden = s !== step;
+    $('step-trends').hidden = step !== 'step-grant';
+    $('step-reports').hidden = step !== 'step-grant';
+    $('step-phrases').hidden = step !== 'step-grant';
+    $('step-push').hidden = step !== 'step-grant';
+    $('step-stats').hidden = step !== 'step-grant';
+  }
+
+  async function call(body, fn = 'admin-grant') {
+    const { data, error } = await sb.functions.invoke(fn, { body });
+    if (error) {
+      const payload = await error.context?.json?.().catch(() => null);
+      throw new Error(payload?.code ?? 'server_error');
+    }
+    return data;
+  }
+
+  async function enter(session) {
+    try {
+      const { admin } = await call({ check: true });
+      if (!admin) { await sb.auth.signOut(); show('step-email'); return say(ERRORS.not_admin, true); }
+      $('who').textContent = session.user.email ?? '';
+      show('step-grant');
+      loadTrends();
+      loadReports();
+      loadPhrases();
+      loadBroadcasts();
+      loadStats();
+    } catch { say('Não foi possível ligar ao servidor.', true); }
+  }
+
+  $('send').onclick = async () => {
+    const email = $('email').value.trim();
+    if (!email) return;
+    $('send').disabled = true;
+    // Never creates accounts: only the existing admin account can sign in here.
+    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: location.href.split('#')[0] } });
+    $('send').disabled = false;
+    if (error) return say('Não foi possível enviar o código. Espera um pouco e tenta outra vez.', true);
+    show('step-code');
+    say('Enviámos um link de entrada para o teu email.');
+  };
+
+  $('grant').onclick = async () => {
+    const accountCode = $('account').value.trim();
+    const credits = Number($('credits').value);
+    if (!accountCode) return say('Escreve o código da conta.', true);
+    if (!confirm(`Dar ${credits} crédito(s) à conta ${accountCode.toUpperCase()}?`)) return;
+    $('grant').disabled = true;
+    try {
+      const r = await call({ accountCode, credits, note: $('note').value });
+      say(`Feito: +${credits} na conta ${r.accountCode}. Saldo agora: ${r.balance}.`);
+      $('account').value = ''; $('note').value = '';
+    } catch (e) {
+      say(ERRORS[e.message] ?? 'Não foi possível dar os créditos.', true);
+    } finally { $('grant').disabled = false; }
+  };
+
+  // Prices of the packs in euros (App Store, Portugal) and estimated AI cost per picture in dollars.
+  const PACK_EUR = { 'app.petbubble.credits.1': 0.99, 'app.petbubble.credits.5': 3.99, 'app.petbubble.credits.10': 7.99, 'app.petbubble.credits.30': 19.99 };
+  const COST_USD = { fast: 0.05, faithful: 0.12 }; // image + Claude (check and line), approximate
+  const LANG = { 'pt-PT': '🇵🇹 Português', 'en-GB': '🇬🇧 Inglês (UK)', 'en-US': '🇺🇸 Inglês (EUA)', es: '🇪🇸 Espanhol', fr: '🇫🇷 Francês' };
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function table(rows, head) {
+    return '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
+      '<tr>' + head.map((h) => `<th style="text-align:left;padding:4px 6px;color:#6b6b6b;font-weight:600">${esc(h)}</th>`).join('') + '</tr>' +
+      rows.map((r) => '<tr>' + r.map((c) => `<td style="padding:4px 6px;border-top:1px solid #eee">${esc(c)}</td>`).join('') + '</tr>').join('') +
+      '</table>';
+  }
+  async function loadStats() {
+    const box = $('stats');
+    try {
+      const s = await call({ days: Number($('statsDays').value) }, 'admin-stats');
+      const t = s.totals;
+      const revenue = (s.packs ?? []).reduce((sum, p) => sum + (PACK_EUR[p.product] ?? 0) * p.count, 0);
+      const net = revenue * 0.85; // Apple keeps 15% (Small Business Program)
+      const cost = t.fast * COST_USD.fast + t.faithful * COST_USD.faithful;
+      const tiles = [
+        ['Contas (total)', t.accounts], ['Contas novas', t.new_accounts], ['Pessoas que criaram', t.creators],
+        ['Imagens criadas', t.images], ['Falhas (crédito devolvido)', t.failed], ['Espera média', (t.avg_seconds ?? '–') + ' s'],
+        ['Frases novas grátis', t.free_phrases], ['Frases escritas', t.own_phrases], ['Reportadas', t.reported],
+        ['Receita (bruta)', revenue.toFixed(2) + ' €'], ['Receita (após Apple)', net.toFixed(2) + ' €'], ['Custo da IA (estimado)', cost.toFixed(2) + ' $'],
+        ['Modelo rápido', t.fast], ['Modelo fiel', t.faithful], ['Créditos oferecidos', t.gifted_credits],
+      ];
+      box.className = '';
+      box.innerHTML =
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">' +
+        tiles.map(([k, v]) => `<div style="background:#f4f1ff;border-radius:12px;padding:10px"><div class="muted" style="font-size:12px">${esc(k)}</div><div style="font:700 20px 'Bricolage Grotesque',sans-serif">${esc(v)}</div></div>`).join('') +
+        '</div>' +
+        '<h3>Por dia</h3>' + table((s.per_day ?? []).filter((d) => d.accounts || d.images || d.failed || d.purchases).map((d) => [new Date(d.day).toLocaleDateString('pt-PT'), d.accounts, d.images, d.failed, d.purchases, (d.fast * COST_USD.fast + d.faithful * COST_USD.faithful).toFixed(2) + ' $']), ['Dia', 'Contas novas', 'Imagens', 'Falhas', 'Compras', 'Custo IA']) +
+        '<h3>Modos mais escolhidos</h3>' + table((s.modes ?? []).map((m) => [m.mode, m.count]), ['Modo', 'Imagens']) +
+        '<h3>🏆 Modos de maior sucesso (mais partilhados)</h3>' +
+        '<p class="muted" style="margin:0 0 6px;font-size:13px">Imagens que as pessoas partilharam ou guardaram (conta desde 13/11).</p>' +
+        table((s.shared_modes ?? []).map((m) => [m.mode, m.images, m.shared, (m.images ? Math.round((100 * m.shared) / m.images) : 0) + '%', m.shares, m.saves]), ['Modo', 'Imagens', 'Partilhadas', 'Sucesso', 'Partilhar', 'Guardar']) +
+        '<h3>💬 Frases (mais partilhadas primeiro)</h3>' +
+        table((s.top_phrases ?? []).map((f) => [f.phrase + (f.own ? ' ✍️' : ''), f.mode, f.shares]), ['Frase (✍️ = escrita pela pessoa)', 'Modo', 'Partilhas']) +
+        '<h3>Compras por pacote</h3>' + ((s.packs ?? []).length ? table(s.packs.map((p) => [p.product.replace('app.petbubble.credits.', '') + ' créditos', p.count, ((PACK_EUR[p.product] ?? 0) * p.count).toFixed(2) + ' €']), ['Pacote', 'Compras', 'Receita bruta']) : '<p class="muted">Ainda sem compras reais.' + (s.sandbox_purchases ? ` (${s.sandbox_purchases} compras de teste no TestFlight não contam.)` : '') + '</p>') +
+        '<h3>Línguas</h3>' + table((s.languages ?? []).map((l) => [LANG[l.language] ?? l.language, l.count]), ['Língua', 'Imagens']) +
+        '<h3>Países (pessoas com notificações ligadas)</h3>' + ((s.countries ?? []).length ? table(s.countries.map((c) => [c.market, c.count]), ['País', 'Pessoas']) : '<p class="muted">Ainda sem dados.</p>') +
+        '<h3>Motivos das falhas</h3>' + ((s.failures ?? []).length ? table(s.failures.map((f) => [f.reason, f.count]), ['Motivo', 'Vezes']) : '<p class="muted">Nenhuma falha. 🎉</p>') +
+        '<p class="muted" style="font-size:12px">Receita com os preços de Portugal; o custo da IA é uma estimativa (rápido ~0,05 $, fiel ~0,12 $ por imagem).</p>';
+    } catch { box.textContent = 'Não foi possível carregar as estatísticas.'; }
+  }
+  $('statsDays').onchange = loadStats;
+
+  async function loadBroadcasts() {
+    try {
+      const { broadcasts } = await call({ list: true }, 'admin-push');
+      const box = $('broadcasts'); box.innerHTML = '';
+      for (const b of broadcasts) {
+        const row = document.createElement('div'); row.className = 'muted';
+        row.textContent = new Date(b.sent_at).toLocaleString('pt-PT') + ' · ' + b.markets.join(', ') + ' · ' + b.sent_count + ' enviadas · ' + (b.texts?.['pt-PT']?.title ?? '');
+        box.append(row);
+      }
+    } catch { /* the list is optional */ }
+  }
+
+  $('sendPush').onclick = async () => {
+    const title = $('pushTitle').value.trim();
+    const body = $('pushBody').value.trim();
+    const markets = [...document.querySelectorAll('input[name=pushMarket]:checked')].map((i) => i.value);
+    if (!title || !body) return say('Escreve o título e a mensagem.', true);
+    if (markets.length === 0) return say('Escolhe pelo menos um país.', true);
+    if (!confirm(`Enviar "${title}" para ${markets.join(', ')}? Só podes enviar outra daqui a 7 dias.`)) return;
+    $('sendPush').disabled = true;
+    try {
+      const r = await call({ title, body, markets }, 'admin-push');
+      say(`Enviada para ${r.sent} telemóvel(is). EN: "${r.texts.en.title}" · ES: "${r.texts.es.title}" · FR: "${r.texts.fr.title}"`);
+      $('pushTitle').value = ''; $('pushBody').value = '';
+      loadBroadcasts();
+    } catch (e) {
+      say(e.message === 'too_soon' ? 'Já enviaste uma notificação nos últimos 7 dias.' : e.message === 'translation_failed' ? 'A tradução falhou. Tenta outra vez.' : 'Não foi possível enviar.', true);
+    } finally { $('sendPush').disabled = false; }
+  };
+
+  async function loadTrends() {
+    try {
+      const { trends } = await call({ list: true }, 'admin-trends');
+      const box = $('trends'); box.innerHTML = '';
+      for (const t of trends) {
+        const row = document.createElement('div'); row.className = 'row';
+        const name = document.createElement('span'); name.textContent = t.name + ' · ' + (t.markets ?? []).join(', ') + (t.active ? '' : ' · terminado');
+        row.append(name);
+        if (t.active) {
+          const b = document.createElement('button'); b.className = 'secondary'; b.textContent = 'Terminar';
+          b.onclick = async () => {
+            if (!confirm(`Terminar o tema "${t.name}"?`)) return;
+            await call({ end: t.id }, 'admin-trends'); loadTrends();
+          };
+          row.append(b);
+        }
+        box.append(row);
+      }
+    } catch { /* the list is optional */ }
+  }
+
+  const FLAGS = { 'pt-PT': '🇵🇹', en: '🇬🇧🇺🇸', es: '🇪🇸', fr: '🇫🇷' };
+  async function loadPhrases() {
+    try {
+      const { recent, starred } = await call({ list: true }, 'admin-phrases');
+      const box = $('phrases'); box.innerHTML = '';
+      const ids = new Map(starred.map((s) => [s.language + '|' + s.text, s.id]));
+      const rows = [...recent];
+      for (const s of starred) if (!recent.some((r) => r.language === s.language && r.text === s.text)) rows.push({ ...s, starred: true });
+      if (rows.length === 0) { box.textContent = 'Ainda ninguém escreveu a sua frase.'; box.className = 'muted'; return; }
+      for (const r of rows) {
+        const row = document.createElement('div'); row.className = 'row';
+        const text = document.createElement('span'); text.textContent = (FLAGS[r.language] ?? '') + ' ' + r.text;
+        const b = document.createElement('button'); b.className = r.starred ? 'primary' : 'secondary';
+        b.textContent = r.starred ? '⭐ Exemplo' : '☆ Usar';
+        b.style.width = 'auto';
+        b.onclick = async () => {
+          b.disabled = true;
+          try {
+            if (r.starred) await call({ unstar: ids.get(r.language + '|' + r.text) }, 'admin-phrases');
+            else await call({ star: { text: r.text, language: r.language } }, 'admin-phrases');
+            loadPhrases();
+          } catch { say('Não foi possível guardar.', true); b.disabled = false; }
+        };
+        row.append(text, b); box.append(row);
+      }
+    } catch { /* the list is optional */ }
+  }
+
+  $('addPhrase').onclick = async () => {
+    const text = $('newPhrase').value.replace(/\s+/g, ' ').trim();
+    if (!text) return say('Escreve a frase.', true);
+    $('addPhrase').disabled = true;
+    try {
+      await call({ star: { text, language: $('newPhraseLang').value } }, 'admin-phrases');
+      $('newPhrase').value = ''; say('Frase-modelo adicionada.'); loadPhrases();
+    } catch { say('Não foi possível guardar.', true); }
+    finally { $('addPhrase').disabled = false; }
+  };
+
+  async function loadReports() {
+    try {
+      const { reports } = await call({}, 'admin-reports');
+      const box = $('reports'); box.innerHTML = '';
+      if (reports.length === 0) { box.textContent = 'Nenhuma imagem reportada.'; box.className = 'muted'; return; }
+      for (const r of reports) {
+        const row = document.createElement('div'); row.className = 'row'; row.style.alignItems = 'flex-start';
+        if (r.image_url) {
+          const img = document.createElement('img'); img.src = r.image_url; img.alt = '';
+          img.style.cssText = 'width:96px;border-radius:12px;flex:none'; row.append(img);
+        }
+        const text = document.createElement('span');
+        text.textContent = new Date(r.reported_at).toLocaleString('pt-PT') + ' · ' + (r.account_code ?? '') + (r.phrase ? ' · "' + r.phrase + '"' : '');
+        row.append(text); box.append(row);
+      }
+    } catch { /* the list is optional */ }
+  }
+
+  $('publish').onclick = async () => {
+    const topic = $('topic').value.trim();
+    if (topic.length < 3) return say('Escreve o tema.', true);
+    const markets = [...document.querySelectorAll('input[name=market]:checked')].map((c) => c.value);
+    if (markets.length === 0) return say('Escolhe pelo menos um país.', true);
+    $('publish').disabled = true; say('A preparar o tema com a IA…');
+    try {
+      const { trend } = await call({ topic, markets }, 'admin-trends');
+      say(`Publicado: "${trend.names['pt-PT']}" · EN "${trend.names.en}" · ES "${trend.names.es}" · FR "${trend.names.fr}"`);
+      $('topic').value = ''; document.querySelectorAll('input[name=market]').forEach((c) => (c.checked = false)); loadTrends();
+    } catch (e) {
+      say(e.message === 'topic_rejected' ? 'A IA recusou este tema (pessoas reais, marcas, política ou tragédias).' : 'Não foi possível publicar o tema.', true);
+    } finally { $('publish').disabled = false; }
+  };
+
+  $('logout').onclick = async () => { await sb.auth.signOut(); show('step-email'); $('msg').hidden = true; };
+
+  // Coming back from the email link, the session arrives in the address.
+  let entered = false;
+  sb.auth.onAuthStateChange((_event, session) => {
+    if (session && !entered) { entered = true; $('msg').hidden = true; enter(session); }
+  });
+</script>
+</body>
+</html>
