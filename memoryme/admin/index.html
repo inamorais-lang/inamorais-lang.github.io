@@ -14,7 +14,9 @@
   main { max-width:440px; margin:0 auto; padding:24px 16px 48px; }
   h1 { font:700 28px/1.1 "Bricolage Grotesque", sans-serif; margin:8px 0 4px; }
   .muted { color:var(--muted); margin:0 0 20px; }
-  .card { background:var(--surface); border-radius:18px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); display:grid; gap:12px; margin-bottom:16px; }
+  .card { background:var(--surface); border-radius:18px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); display:grid; grid-template-columns:minmax(0,1fr); gap:12px; margin-bottom:16px; }
+  .card > * { min-width:0; }
+  .tiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
   label { font-weight:600; font-size:14px; display:grid; gap:6px; }
   input, select { font:inherit; padding:12px 14px; border-radius:12px; border:0; background:var(--paper); width:100%; }
   input:focus, select:focus { outline:2px solid var(--pink); }
@@ -211,12 +213,13 @@
   const PACK_EUR = { 'app.petbubble.credits.1': 0.99, 'app.petbubble.credits.5': 3.99, 'app.petbubble.credits.10': 7.99, 'app.petbubble.credits.30': 19.99 };
   const COST_USD = { fast: 0.05, faithful: 0.12 }; // image + Claude (check and line), approximate
   const LANG = { 'pt-PT': '🇵🇹 Português', 'en-GB': '🇬🇧 Inglês (UK)', 'en-US': '🇺🇸 Inglês (EUA)', es: '🇪🇸 Espanhol', fr: '🇫🇷 Francês' };
+  const eur = (n) => n.toFixed(2).replace('.', ',');
   const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function table(rows, head) {
-    return '<table style="width:100%;border-collapse:collapse;font-size:14px">' +
+    return '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table style="width:100%;border-collapse:collapse;font-size:14px">' +
       '<tr>' + head.map((h) => `<th style="text-align:left;padding:4px 6px;color:#6b6b6b;font-weight:600">${esc(h)}</th>`).join('') + '</tr>' +
       rows.map((r) => '<tr>' + r.map((c) => `<td style="padding:4px 6px;border-top:1px solid #eee">${esc(c)}</td>`).join('') + '</tr>').join('') +
-      '</table>';
+      '</table></div>';
   }
   async function loadStats() {
     const box = $('stats');
@@ -230,12 +233,12 @@
         ['Contas (total)', t.accounts], ['Contas novas', t.new_accounts], ['Pessoas que criaram', t.creators],
         ['Imagens criadas', t.images], ['Falhas (crédito devolvido)', t.failed], ['Espera média', (t.avg_seconds ?? '–') + ' s'],
         ['Frases novas grátis', t.free_phrases], ['Frases escritas', t.own_phrases], ['Reportadas', t.reported],
-        ['Receita (bruta)', revenue.toFixed(2) + ' €'], ['Receita (após Apple)', net.toFixed(2) + ' €'], ['Custo da IA (estimado)', cost.toFixed(2) + ' $'],
+        ['Receita (bruta)', eur(revenue) + ' €'], ['Receita (após Apple)', eur(net) + ' €'], ['Custo da IA (estimado)', eur(cost) + ' $'],
         ['Modelo rápido', t.fast], ['Modelo fiel', t.faithful], ['Créditos oferecidos', t.gifted_credits],
       ];
       box.className = '';
       box.innerHTML =
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">' +
+        '<div class="tiles">' +
         tiles.map(([k, v]) => `<div style="background:#f4f1ff;border-radius:12px;padding:10px"><div class="muted" style="font-size:12px">${esc(k)}</div><div style="font:700 20px 'Bricolage Grotesque',sans-serif">${esc(v)}</div></div>`).join('') +
         '</div>' +
         '<h3>Por dia</h3>' + table((s.per_day ?? []).filter((d) => d.accounts || d.images || d.failed || d.purchases).map((d) => [new Date(d.day).toLocaleDateString('pt-PT'), d.accounts, d.images, d.failed, d.purchases, (d.fast * COST_USD.fast + d.faithful * COST_USD.faithful).toFixed(2) + ' $']), ['Dia', 'Contas novas', 'Imagens', 'Falhas', 'Compras', 'Custo IA']) +
