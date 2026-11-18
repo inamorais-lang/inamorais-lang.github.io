@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PetBubble</title>
+<meta name="description" content="O que pensa o teu patudo? Descarrega a PetBubble.">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+<script>
+  // One link for the bio: iPhone/iPad go straight to the App Store; Android to Google Play once it exists.
+  var APP_STORE = 'https://apps.apple.com/app/id6834418567';
+  var PLAY_STORE = ''; // fill in when the Android app is on Google Play
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
+  if (isIOS) location.replace(APP_STORE);
+  else if (isAndroid && PLAY_STORE) location.replace(PLAY_STORE);
+</script>
+<style>
+  :root { --lime:#C8F53A; --pink:#FF3D81; --ink:#141414; --muted:#5b5b5b; --paper:#F7F6F2; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; background:var(--paper); color:var(--ink); font-family:'DM Sans',system-ui,sans-serif;
+         display:flex; align-items:center; justify-content:center; padding:24px 16px; }
+  main { width:100%; max-width:420px; text-align:center; }
+  .logo { width:96px; height:96px; border-radius:24px; box-shadow:0 8px 24px rgba(0,0,0,.12); }
+  h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:44px; margin:16px 0 4px; letter-spacing:-.5px; }
+  .tag { font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:22px; margin:0 0 20px; }
+  .tag mark { background:var(--lime); padding:0 6px; }
+  .shot { width:100%; max-width:300px; border-radius:24px; box-shadow:0 12px 32px rgba(0,0,0,.15); display:block; margin:0 auto 24px; }
+  .btn { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:58px; border-radius:999px;
+         background:var(--pink); color:#fff; font-weight:700; font-size:18px; text-decoration:none; margin:0 0 12px; }
+  .btn.play { background:var(--lime); color:var(--ink); }
+  [hidden] { display:none !important; }
+  .btn svg { width:22px; height:22px; fill:currentColor; }
+  .note { color:var(--muted); font-size:14px; margin:8px 0 0; }
+  footer { margin-top:28px; font-size:13px; color:var(--muted); }
+  footer a { color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="icon.png" alt="PetBubble">
+  <h1>PetBubble</h1>
+  <p class="tag" id="tag">O que pensa o teu <mark>patudo</mark>?</p>
+  <img class="shot" src="example.jpg" alt="">
+  <a class="btn" id="ios" href="https://apps.apple.com/app/id6834418567">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.37 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.88-.76-1.48.02-2.85.86-3.61 2.19-1.54 2.67-.39 6.62 1.11 8.79.73 1.06 1.6 2.25 2.75 2.2 1.1-.04 1.52-.71 2.85-.71 1.33 0 1.71.71 2.88.69 1.19-.02 1.94-1.08 2.67-2.14.84-1.23 1.19-2.42 1.21-2.48-.03-.01-2.32-.89-2.34-3.55zM14.18 6.09c.61-.74 1.02-1.76.91-2.78-.88.04-1.94.59-2.57 1.32-.56.65-1.06 1.69-.93 2.69.98.08 1.98-.5 2.59-1.23z"/></svg>
+    <span id="iosLabel">Descarregar na App Store</span>
+  </a>
+  <a class="btn play" id="play" href="#" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 2.2 13.4 12l-9.8 9.8c-.35-.2-.6-.6-.6-1.1V3.3c0-.5.25-.9.6-1.1zm11 8.6 2.6-2.6 3.3 1.9c.9.5.9 1.8 0 2.3l-3.3 1.9-2.6-2.6 1.2-1.2-1.2-1.2zM4.7 1.5l9.9 5.7-2.3 2.3L4.7 1.5zm0 21 7.6-8 2.3 2.3-9.9 5.7z"/></svg>
+    <span id="playLabel">Disponível no Google Play</span>
+  </a>
+  <p class="note" id="note">Para iPhone</p>
+  <footer><a id="legal" href="legal/">Termos e privacidade</a></footer>
+</main>
+<script>
+  var T = {
+    pt: ['O que pensa o teu <mark>patudo</mark>?', 'Descarregar na App Store', 'Disponível no Google Play', 'Para iPhone', 'Termos e privacidade'],
+    es: ['¿Qué piensa tu <mark>mascota</mark>?', 'Descargar en la App Store', 'Disponible en Google Play', 'Para iPhone', 'Términos y privacidad'],
+    fr: ['À quoi pense ton <mark>compagnon</mark> ?', 'Télécharger sur l’App Store', 'Disponible sur Google Play', 'Pour iPhone', 'Conditions et confidentialité'],
+    en: ['What is your <mark>pet</mark> thinking?', 'Download on the App Store', 'Get it on Google Play', 'For iPhone', 'Terms and privacy']
+  };
+  var lang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  var t = T[lang] || T.en;
+  document.documentElement.lang = T[lang] ? lang : 'en';
+  document.getElementById('tag').innerHTML = t[0];
+  document.getElementById('iosLabel').textContent = t[1];
+  document.getElementById('playLabel').textContent = t[2];
+  document.getElementById('note').textContent = t[3];
+  document.getElementById('legal').textContent = t[4];
+  if (PLAY_STORE) {
+    var p = document.getElementById('play');
+    p.href = PLAY_STORE; p.hidden = false;
+    document.getElementById('note').hidden = true;
+  }
+</script>
+</body>
+</html>
