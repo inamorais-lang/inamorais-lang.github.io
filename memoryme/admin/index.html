@@ -10,6 +10,7 @@
 <style>
   :root { --paper:#F7F6F2; --ink:#141414; --muted:#6E6D72; --pink:#FF3D81; --lime:#C8F53A; --surface:#fff; }
   * { box-sizing: border-box; }
+  html, body { overflow-x:hidden; }
   body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.45 "DM Sans", system-ui, sans-serif; }
   main { max-width:440px; margin:0 auto; padding:24px 16px 48px; }
   h1 { font:700 28px/1.1 "Bricolage Grotesque", sans-serif; margin:8px 0 4px; }
@@ -249,6 +250,8 @@
         '<h3>💬 Frases (mais partilhadas primeiro)</h3>' +
         table((s.top_phrases ?? []).map((f) => [f.phrase + (f.own ? ' ✍️' : ''), f.mode, f.shares]), ['Frase (✍️ = escrita pela pessoa)', 'Modo', 'Partilhas']) +
         '<h3>Compras por pacote</h3>' + ((s.packs ?? []).length ? table(s.packs.map((p) => [p.product.replace('app.petbubble.credits.', '') + ' créditos', p.count, ((PACK_EUR[p.product] ?? 0) * p.count).toFixed(2) + ' €']), ['Pacote', 'Compras', 'Receita bruta']) : '<p class="muted">Ainda sem compras reais.' + (s.sandbox_purchases ? ` (${s.sandbox_purchases} compras de teste no TestFlight não contam.)` : '') + '</p>') +
+        '<h3>🎁 Códigos de oferta usados</h3>' + ((s.offer_codes ?? []).length ? table(s.offer_codes.map((o) => [o.product.replace('app.petbubble.credits.', '') + ' créditos', o.count, o.credits]), ['Pacote', 'Códigos', 'Créditos oferecidos']) : '<p class="muted">Nenhum código usado ainda. Não contam como receita.</p>') +
+        (s.newsletter ? '<h3>📬 Newsletter (petbubble.app, desde sempre)</h3>' + table([['Inscritos confirmados', s.newsletter.confirmed], ['À espera de confirmar', s.newsletter.pending], ['Saíram da lista', s.newsletter.unsubscribed], ['Códigos que sobram', s.newsletter.codes_left + ' de ' + s.newsletter.codes_total + (s.newsletter.codes_left < 50 ? ' ⚠️ pede mais à Apple' : '')]], ['', 'Total']) : '') +
         '<h3>Línguas</h3>' + table((s.languages ?? []).map((l) => [LANG[l.language] ?? l.language, l.count]), ['Língua', 'Imagens']) +
         '<h3>Países (pessoas com notificações ligadas)</h3>' + ((s.countries ?? []).length ? table(s.countries.map((c) => [c.market, c.count]), ['País', 'Pessoas']) : '<p class="muted">Ainda sem dados.</p>') +
         '<h3>Motivos das falhas</h3>' + ((s.failures ?? []).length ? table(s.failures.map((f) => [f.reason, f.count]), ['Motivo', 'Vezes']) : '<p class="muted">Nenhuma falha. 🎉</p>') +

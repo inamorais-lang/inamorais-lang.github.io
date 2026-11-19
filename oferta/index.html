@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PetBubble · 1 imagem grátis</title>
+<meta name="description" content="Deixa o teu email e recebe um código com 1 imagem grátis na PetBubble.">
+<meta property="og:title" content="PetBubble · 1 imagem grátis">
+<meta property="og:description" content="Deixa o teu email e recebe um código com 1 imagem grátis na PetBubble.">
+<meta property="og:image" content="https://petbubble.app/hero.jpg">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../icon.png">
+<link rel="apple-touch-icon" href="../icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --lime:#C8F53A; --pink:#FF3D81; --lilac:#ECE6FF; --ink:#141414; --muted:#6b6b6b; --paper:#F7F6F2; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--paper); color:var(--ink); font-family:'DM Sans',sans-serif; overflow-x:hidden; }
+  header { max-width:720px; margin:0 auto; padding:22px 20px; display:flex; align-items:center; gap:10px; font:800 22px 'Bricolage Grotesque',sans-serif; }
+  header a { display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none; }
+  header img { width:40px; height:40px; border-radius:11px; }
+  main { max-width:720px; margin:0 auto; padding:0 16px 40px; }
+  .hero { border-radius:28px; overflow:hidden; margin-bottom:18px; aspect-ratio:16/10; background:#ddd url(../hero.jpg) center 30%/cover; }
+  .box { background:linear-gradient(120deg,#FFD6E6 0%,#ECE6FF 100%); border-radius:32px; padding:30px 26px; position:relative; overflow:hidden; }
+  .box .gift { position:absolute; right:-14px; top:-20px; font-size:110px; opacity:.14; transform:rotate(12deg); pointer-events:none; }
+  h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:32px; line-height:1.08; margin:0 0 10px; }
+  h1 mark { background:var(--pink); color:#fff; padding:0 8px; border-radius:8px; }
+  p { margin:0 0 14px; font-size:16px; line-height:1.5; color:#3d3d3d; }
+  form { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  input[type=email] { flex:1 1 220px; min-height:56px; border-radius:999px; border:0; padding:0 22px; font:inherit; font-size:17px; background:#fff; color:var(--ink); }
+  .btn { display:inline-flex; align-items:center; justify-content:center; min-height:56px; border-radius:999px; border:0; padding:0 26px; background:var(--ink); color:#fff; font:700 17px 'DM Sans',sans-serif; text-decoration:none; cursor:pointer; }
+  .btn[disabled] { opacity:.6; cursor:default; }
+  .btn.pink { background:var(--pink); }
+  .hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+  .small { font-size:12.5px; color:var(--muted); margin:14px 0 0; }
+  .small a { color:inherit; }
+  .msg { font-weight:700; color:var(--ink); }
+  .err { color:#b0004a; font-weight:700; margin:12px 0 0; }
+  .code { background:#fff; border:2px dashed var(--pink); border-radius:16px; padding:16px 10px; text-align:center; font:800 19px 'Bricolage Grotesque',sans-serif; letter-spacing:1px; word-break:break-all; margin:6px 0 16px; }
+  .stack { display:flex; flex-direction:column; gap:10px; }
+  [hidden] { display:none !important; }
+  footer { max-width:720px; margin:0 auto; padding:10px 20px 36px; text-align:center; color:var(--muted); font-size:14px; }
+  footer a { color:inherit; }
+  @media (max-width:520px) { h1 { font-size:28px; } .box { padding:26px 20px; } .btn { width:100%; } }
+</style>
+</head>
+<body>
+<header><a href="../"><img src="../icon.png" alt=""><span>PetBubble</span></a></header>
+<main>
+  <div class="hero" role="img" aria-label="Cão vestido a rigor com um balão de pensamento"></div>
+
+  <!-- 1. Form -->
+  <section class="box" id="sForm">
+    <div class="gift" aria-hidden="true">🎁</div>
+    <h1>Recebe <mark>1 imagem</mark> grátis</h1>
+    <p>Deixa o teu email e enviamos-te um código para experimentares a PetBubble. De vez em quando avisamos-te de modos novos (prometemos não encher a caixa).</p>
+    <form id="form" novalidate>
+      <input type="email" id="email" name="email" placeholder="o.teu@email.com" autocomplete="email" inputmode="email" required>
+      <input type="text" class="hp" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn" id="send" type="submit">Quero o código</button>
+    </form>
+    <p class="err" id="formErr" hidden></p>
+    <p class="small">Um código por email. Só para iPhone. Podes sair da lista a qualquer momento. <a href="../legal/privacidade.html#newsletter">Privacidade</a></p>
+  </section>
+
+  <!-- 2. Check your email -->
+  <section class="box" id="sSent" hidden>
+    <div class="gift" aria-hidden="true">📬</div>
+    <h1>Vê o teu email</h1>
+    <p>Enviámos-te um email. Toca em <b>«Confirmar e receber o código»</b> e o código aparece logo.</p>
+    <p class="small">Não chegou? Vê no Lixo ou no Spam, ou espera uns minutos.</p>
+  </section>
+
+  <!-- 3. Your code -->
+  <section class="box" id="sCode" hidden>
+    <div class="gift" aria-hidden="true">🎁</div>
+    <h1>Aqui está o teu código</h1>
+    <div class="code" id="code"></div>
+    <div class="stack">
+      <a class="btn" id="redeem" href="#">Usar o código no iPhone</a>
+      <a class="btn pink" href="https://apps.apple.com/app/id6834418567">Instalar a PetBubble</a>
+    </div>
+    <p class="small">Também o enviámos para o teu email. Na app: ⚙️ Definições › <b>Tenho um código</b>.</p>
+  </section>
+
+  <!-- 4. Left the list / errors -->
+  <section class="box" id="sInfo" hidden>
+    <h1 id="infoTitle"></h1>
+    <p id="infoText"></p>
+    <a class="btn" href="./">Voltar</a>
+  </section>
+</main>
+<footer><a href="../legal/">Termos e privacidade</a> · <a href="mailto:petbubble.ai@icloud.com">petbubble.ai@icloud.com</a></footer>
+
+<script>
+  var API = 'https://zuwfxzgbxhdpnmkyjdad.supabase.co/functions/v1/newsletter';
+  var $ = function (id) { return document.getElementById(id); };
+  function show(id) { ['sForm', 'sSent', 'sCode', 'sInfo'].forEach(function (s) { $(s).hidden = s !== id; }); window.scrollTo(0, 0); }
+  function info(title, text) { $('infoTitle').textContent = title; $('infoText').textContent = text; show('sInfo'); }
+  function call(body) {
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j.status = r.status; return j; }); });
+  }
+
+  var q = new URLSearchParams(location.search);
+  var confirmToken = q.get('c'), leaveToken = q.get('u');
+  if (confirmToken || leaveToken) history.replaceState(null, '', location.pathname);
+
+  if (confirmToken) {
+    info('Um momento…', 'A confirmar o teu email.');
+    call({ action: 'confirm', token: confirmToken }).then(function (r) {
+      if (r.ok && r.code) {
+        $('code').textContent = r.code; $('redeem').href = r.redeemUrl; show('sCode');
+      } else if (r.code === 'no_codes_left') {
+        info('Os códigos acabaram', 'Desculpa: já demos todos os códigos desta oferta. O teu email ficou confirmado e avisamos-te da próxima.');
+      } else if (r.code === 'unsubscribed') {
+        info('Saíste da lista', 'Este link já não é válido. Se quiseres voltar, deixa outra vez o teu email.');
+      } else {
+        info('Link inválido', 'Este link não é válido ou já expirou. Deixa outra vez o teu email para receberes um novo.');
+      }
+    }).catch(function () { info('Sem ligação', 'Não conseguimos confirmar agora. Tenta outra vez daqui a pouco.'); });
+  } else if (leaveToken) {
+    call({ action: 'unsubscribe', token: leaveToken }).then(function () {
+      info('Saíste da lista', 'Já não te vamos enviar emails. Obrigado por teres experimentado a PetBubble 🐾');
+    }).catch(function () { info('Sem ligação', 'Não conseguimos fazer isto agora. Tenta outra vez daqui a pouco.'); });
+  }
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = $('email').value.trim();
+    $('formErr').hidden = true;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $('formErr').textContent = 'Escreve um email válido.'; $('formErr').hidden = false; return; }
+    $('send').disabled = true;
+    call({ action: 'subscribe', email: email, website: $('website').value }).then(function (r) {
+      $('send').disabled = false;
+      if (r.ok) show('sSent');
+      else { $('formErr').textContent = r.code === 'invalid_email' ? 'Escreve um email válido.' : 'Não conseguimos enviar agora. Tenta outra vez daqui a pouco.'; $('formErr').hidden = false; }
+    }).catch(function () { $('send').disabled = false; $('formErr').textContent = 'Sem ligação. Tenta outra vez.'; $('formErr').hidden = false; });
+  });
+</script>
+</body>
+</html>
