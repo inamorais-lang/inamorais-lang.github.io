@@ -131,6 +131,12 @@
     <div id="phrases"></div>
   </section>
 
+  <section class="card" id="step-examples" hidden>
+    <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">⭐ Exemplos dos modos</h2>
+    <p class="muted" style="margin:0">Toca em ☆ nas 2–3 melhores imagens de cada modo (só as tuas e as de teste). Aparecem na app em "👀 Ver exemplos", sem balão. Os modos sem ⭐ não mostram o botão. Escolhe resultados normais, não só os melhores.</p>
+    <div id="examples"><p class="muted">A carregar…</p></div>
+  </section>
+
   <section class="card" id="step-reports" hidden>
     <h2 style="margin:0;font:700 20px 'Bricolage Grotesque',sans-serif">🚩 Imagens reportadas</h2>
     <p class="muted" style="margin:0">Imagens que os donos reportaram como impróprias na app (mais recentes primeiro).</p>
@@ -156,6 +162,7 @@
     $('step-trends').hidden = step !== 'step-grant';
     $('step-reports').hidden = step !== 'step-grant';
     $('step-phrases').hidden = step !== 'step-grant';
+    $('step-examples').hidden = step !== 'step-grant';
     $('step-push').hidden = step !== 'step-grant';
     $('step-stats').hidden = step !== 'step-grant';
   }
@@ -178,6 +185,7 @@
       loadTrends();
       loadReports();
       loadPhrases();
+      loadExamples();
       loadBroadcasts();
       loadStats();
     } catch { say('Não foi possível ligar ao servidor.', true); }
@@ -213,6 +221,7 @@
   // Prices of the packs in euros (App Store, Portugal) and estimated AI cost per picture in dollars.
   const PACK_EUR = { 'app.petbubble.credits.1': 0.99, 'app.petbubble.credits.5': 3.99, 'app.petbubble.credits.10': 7.99, 'app.petbubble.credits.30': 19.99 };
   const COST_USD = { fast: 0.05, faithful: 0.12 }; // image + Claude (check and line), approximate
+  const EUR_PER_USD = 0.87; // the AI is billed in dollars; shown in euros like the revenue (approximate rate)
   const LANG = { 'pt-PT': '🇵🇹 Português', 'en-GB': '🇬🇧 Inglês (UK)', 'en-US': '🇺🇸 Inglês (EUA)', es: '🇪🇸 Espanhol', fr: '🇫🇷 Francês' };
   const eur = (n) => n.toFixed(2).replace('.', ',');
   const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -234,7 +243,7 @@
         ['Contas (total)', t.accounts], ['Contas novas', t.new_accounts], ['Pessoas que criaram', t.creators],
         ['Imagens criadas', t.images], ['Falhas (crédito devolvido)', t.failed], ['Espera média', (t.avg_seconds ?? '–') + ' s'],
         ['Frases novas grátis', t.free_phrases], ['Frases escritas', t.own_phrases], ['Reportadas', t.reported],
-        ['Receita (bruta)', eur(revenue) + ' €'], ['Receita (após Apple)', eur(net) + ' €'], ['Custo da IA (estimado)', eur(cost) + ' $'],
+        ['Receita (bruta)', eur(revenue) + ' €'], ['Receita (após Apple)', eur(net) + ' €'], ['Custo da IA (estimado)', eur(cost * EUR_PER_USD) + ' €'],
         ['Modelo rápido', t.fast], ['Modelo fiel', t.faithful], ['Créditos oferecidos', t.gifted_credits],
       ];
       box.className = '';
@@ -242,7 +251,14 @@
         '<div class="tiles">' +
         tiles.map(([k, v]) => `<div style="background:#f4f1ff;border-radius:12px;padding:10px"><div class="muted" style="font-size:12px">${esc(k)}</div><div style="font:700 20px 'Bricolage Grotesque',sans-serif">${esc(v)}</div></div>`).join('') +
         '</div>' +
-        '<h3>Por dia</h3>' + table((s.per_day ?? []).filter((d) => d.accounts || d.images || d.failed || d.purchases).map((d) => [new Date(d.day).toLocaleDateString('pt-PT'), d.accounts, d.images, d.failed, d.purchases, (d.fast * COST_USD.fast + d.faithful * COST_USD.faithful).toFixed(2) + ' $']), ['Dia', 'Contas novas', 'Imagens', 'Falhas', 'Compras', 'Custo IA']) +
+        (s.funnel ? '<h3>🚦 Onde as pessoas param</h3>' +
+          '<p class="muted" style="margin:0 0 6px;font-size:13px">Telemóveis que chegaram a cada passo (cada telemóvel conta 1 vez por dia; sem nomes). Conta desde 24/11.</p>' +
+          table([['Abriram a app', 'open'], ['Escolheram um modo', 'mode'], ['Escolheram a foto', 'photo'], ['Viram o início de sessão', 'signin'], ['Viram os preços', 'paywall'], ['Criaram uma imagem', 'image']].map(([label, k]) => {
+            const n = s.funnel.steps?.[k] ?? 0, open = s.funnel.steps?.open ?? 0;
+            return [label, n, open ? Math.round((100 * n) / open) + '%' : '–'];
+          }).concat([['Compraram (pagas)', s.funnel.purchases ?? 0, '']]), ['Passo', 'Telemóveis', 'Dos que abriram']) +
+          ((s.funnel.markets ?? []).length ? table(s.funnel.markets.map((m) => [m.market, m.open ?? 0, m.paywall ?? 0, m.image ?? 0]), ['País', 'Abriram', 'Viram os preços', 'Criaram imagem']) : '') : '') +
+        '<h3>Por dia</h3>' + table((s.per_day ?? []).filter((d) => d.accounts || d.images || d.failed || d.purchases).map((d) => [new Date(d.day).toLocaleDateString('pt-PT'), d.accounts, d.images, d.failed, d.purchases, eur((d.fast * COST_USD.fast + d.faithful * COST_USD.faithful) * EUR_PER_USD) + ' €']), ['Dia', 'Contas novas', 'Imagens', 'Falhas', 'Compras', 'Custo IA']) +
         '<h3>Modos mais escolhidos</h3>' + table((s.modes ?? []).map((m) => [m.mode, m.count]), ['Modo', 'Imagens']) +
         '<h3>🏆 Modos de maior sucesso (mais partilhados)</h3>' +
         '<p class="muted" style="margin:0 0 6px;font-size:13px">Imagens que as pessoas partilharam ou guardaram (conta desde 13/11).</p>' +
@@ -349,6 +365,42 @@
     } catch { say('Não foi possível guardar.', true); }
     finally { $('addPhrase').disabled = false; }
   };
+
+  async function loadExamples() {
+    try {
+      const { modes } = await call({ list: true }, 'admin-examples');
+      const box = $('examples'); box.innerHTML = '';
+      for (const m of modes) {
+        const d = document.createElement('details');
+        const sum = document.createElement('summary');
+        sum.style.cssText = 'font-weight:700;padding:8px 0;cursor:pointer';
+        sum.textContent = `${m.name} · ${m.starred ? '⭐ ' + m.starred : (m.items.length ? 'sem exemplos' : 'sem imagens')}`;
+        d.append(sum);
+        const grid = document.createElement('div');
+        grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding-bottom:10px';
+        if (!m.items.length) { const p = document.createElement('p'); p.className = 'muted'; p.textContent = 'Ainda não fizeste imagens neste modo.'; d.append(p); }
+        for (const it of m.items) {
+          const cell = document.createElement('div'); cell.style.cssText = 'position:relative';
+          const img = document.createElement('img'); img.src = it.url; img.loading = 'lazy';
+          img.style.cssText = 'width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:10px;display:block' + (it.starred ? ';outline:3px solid #FF3D81' : '');
+          const b = document.createElement('button');
+          b.textContent = it.starred ? '⭐' : '☆';
+          b.style.cssText = 'position:absolute;top:4px;right:4px;width:34px;height:34px;padding:0;border-radius:50%;border:0;background:' + (it.starred ? '#FF3D81;color:#fff' : 'rgba(255,255,255,.9)');
+          b.onclick = async () => {
+            b.disabled = true;
+            try { await call(it.starred ? { unstar: it.id } : { star: it.id }, 'admin-examples'); it.starred = !it.starred; m.starred += it.starred ? 1 : -1;
+              b.textContent = it.starred ? '⭐' : '☆'; b.style.background = it.starred ? '#FF3D81' : 'rgba(255,255,255,.9)'; b.style.color = it.starred ? '#fff' : '';
+              img.style.outline = it.starred ? '3px solid #FF3D81' : 'none';
+              sum.textContent = `${m.name} · ${m.starred ? '⭐ ' + m.starred : 'sem exemplos'}`;
+            } catch { say('Não foi possível guardar.', true); }
+            finally { b.disabled = false; }
+          };
+          cell.append(img, b); grid.append(cell);
+        }
+        d.append(grid); box.append(d);
+      }
+    } catch { $('examples').textContent = 'Não foi possível carregar.'; }
+  }
 
   async function loadReports() {
     try {
